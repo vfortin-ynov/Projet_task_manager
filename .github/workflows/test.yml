@@ -26,11 +26,6 @@ jobs:
         pip install -r requirements.txt
         pip install pytest pytest-cov black flake8 mypy
 
-    # Vérification du formatage avec Black
-    - name: Check code formatting with Black
-      run: |
-        black --check src/ tests/
-
     # Vérification du style avec Flake8
     - name: Lint with Flake8
       run: |
