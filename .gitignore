@@ -81,3 +81,5 @@ Desktop.ini
 .mypy_cache/
 .dmypy.json
 dmypy.json
+
+tasks_backup.json
