@@ -1,14 +1,18 @@
 """Tests unitaires pour la classe Task."""
+
 from datetime import datetime
+
 import pytest
-from src.task_manager.task import Task, Priority, Status
+
+from src.task_manager.task import Priority, Status, Task
 
 # Import des fixtures
-pytest_plugins = ['tests.fixtures.task_fixtures']
+pytest_plugins = ["tests.fixtures.task_fixtures"]
+
 
 class TestTaskCreation:
     """Tests de création de tâches"""
-    
+
     def test_create_task_sets_title_correctly(self):
         """Vérifie que le titre est correctement défini à la création."""
         task = Task("Tâche de test")
@@ -81,7 +85,8 @@ class TestTaskOperations:
         assert self.task.status == Status.DONE
 
     def test_mark_completed_sets_completed_at_timestamp(self):
-        """Vérifie que marquer une tâche comme terminée définit la date de fin."""
+        """Vérifie que marquer une tâche comme terminée
+        définit la date de fin."""
         before_completion = datetime.now()
         self.task.mark_completed()
         after_completion = datetime.now()
@@ -117,13 +122,13 @@ class TestTaskOperations:
 
 class TestTaskSerialization:
     """Tests de sérialisation JSON"""
-    
+
     def setup_method(self):
         """Crée une tâche complexe avec tous les attributs"""
         self.task = Task(
             "Tâche complexe",
             description="Description détaillée",
-            priority=Priority.HIGH
+            priority=Priority.HIGH,
         )
         self.task.assign_to_project("PROJ-123")
         self.task.mark_completed()
@@ -132,23 +137,30 @@ class TestTaskSerialization:
         """Vérifie que to_dict() inclut tous les champs."""
         task_dict = self.task.to_dict()
         expected_keys = {
-            'id', 'title', 'description', 'priority',
-            'status', 'created_at', 'completed_at', 'project_id'
+            "id",
+            "title",
+            "description",
+            "priority",
+            "status",
+            "created_at",
+            "completed_at",
+            "project_id",
         }
         assert set(task_dict.keys()) == expected_keys
 
     def test_to_dict_converts_priority_to_string(self):
         """Vérifie que la priorité est convertie en chaîne de caractères."""
         task_dict = self.task.to_dict()
-        assert task_dict['priority'] == "HIGH"
+        assert task_dict["priority"] == "HIGH"
 
     def test_to_dict_converts_status_to_string(self):
         """Vérifie que le statut est converti en chaîne de caractères."""
         task_dict = self.task.to_dict()
-        assert task_dict['status'] == "DONE"
+        assert task_dict["status"] == "DONE"
 
     def test_from_dict_recreates_task_with_same_attributes(self):
-        """Vérifie qu'on peut recréer une tâche identique à partir d'un dictionnaire."""
+        """Vérifie qu'on peut recréer une tâche identique
+        à partir d'un dictionnaire."""
         task_dict = self.task.to_dict()
         recreated = Task.from_dict(task_dict)
         assert recreated.title == self.task.title
@@ -162,4 +174,4 @@ class TestTaskSerialization:
     def test_from_dict_with_missing_required_field_raises_key_error(self):
         """Vérifie qu'une erreur est levée si un champ requis est manquant."""
         with pytest.raises(KeyError):
-            Task.from_dict({"title": "Tâche incomplète"})  # manque les champs obligatoires
+            Task.from_dict({"title": "Tâche incomplète"})

@@ -1,11 +1,15 @@
 """Fixtures pour les tests de tâches."""
+
 import pytest
-from src.task_manager.task import Task, Priority
+
+from src.task_manager.task import Priority, Task
+
 
 @pytest.fixture
 def minimal_task():
     """Retourne une tâche avec les paramètres minimaux."""
     return Task("Tâche minimale")
+
 
 @pytest.fixture
 def complete_task():
@@ -13,8 +17,9 @@ def complete_task():
     return Task(
         title="Tâche complète",
         description="Description détaillée",
-        priority=Priority.HIGH
+        priority=Priority.HIGH,
     )
+
 
 @pytest.fixture
 def completed_task():
@@ -22,6 +27,7 @@ def completed_task():
     task = Task("Tâche terminée")
     task.mark_completed()
     return task
+
 
 @pytest.fixture
 def task_with_project():

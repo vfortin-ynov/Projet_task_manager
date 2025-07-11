@@ -1,88 +1,81 @@
-# TODO: Créez les cibles suivantes :
-# - install : installer les dépendances
-# - test : lancer les tests
-# - test-unit : seulement les tests unitaires
-# - test-integration : seulement les tests d'intégration
-# - coverage : couverture avec rapport HTML
-# - clean : nettoyer les fichiers temporaires
-# - lint : vérification syntaxique
-# - all : séquence complète
+# Makefile pour la gestion des tâches
 
-.PHONY: help install test test-cov lint format type-check clean
-
-# Couleurs
-GREEN  := $(shell tput -Txterm setaf 2)
-YELLOW := $(shell tput -Txterm setaf 3)
-WHITE  := $(shell tput -Txterm setaf 7)
-RESET  := $(shell tput -Txterm sgr0)
+.PHONY: help install test test-unit test-integration test-cov lint format type-check clean demo all
 
 ## Affiche cette aide
 help:
 	@echo ''
 	@echo 'Usage:'
-	@echo '  ${YELLOW}make${RESET} ${GREEN}<target>${RESET}'
+	@echo '  make <target>'
 	@echo ''
 	@echo 'Targets:'
-	@awk '/(^[a-zA-Z\-\_0-9]+:.*?## .*$$)|(^##)/ { \
-		helpMessage = match(lastLine, /^## (.*)/); \
-		if (helpMessage) { \
-			helpCommand = substr($$1, 0, index($$1, ":")); \
-			helpMessage = substr(lastLine, RSTART + 3, RLENGTH); \
-			printf "  ${YELLOW}%-$(TARGET_MAX_CHAR_NUM-30)s${GREEN}%s${RESET}\n", helpCommand, helpMessage; \
-		} \
-	} \
-	{ lastLine = $$0 }' $(MAKEFILE_LIST) | sort -u
+	@echo '  all            Exécute la séquence complète (test, lint, format, type-check)'
+	@echo '  install        Installer les dépendances du projet'
+	@echo '  test           Exécuter tous les tests'
+	@echo '  test-unit      Exécuter uniquement les tests unitaires'
+	@echo '  test-integration Exécuter uniquement les tests d\'intégration'
+	@echo '  test-cov       Exécuter les tests avec couverture de code'
+	@echo '  lint           Vérification de la qualité du code avec flake8'
+	@echo '  format         Formater le code avec black et isort'
+	@echo '  type-check     Vérification des types avec mypy'
+	@echo '  clean          Nettoyer les fichiers temporaires'
+	@echo '  demo           Lancer la démonstration'
+
+## Exécute la séquence complète
+all: clean install test lint format type-check
 
 ## Installe les dépendances du projet
 install:
-	@echo "${YELLOW}Installation des dépendances...${RESET}"
+	@echo "Installation des dépendances..."
 	pip install -r requirements.txt
-	pip install -r requirements-dev.txt
+	pip install -e .
 
 ## Exécute tous les tests
 TEST_PATH=./tests
-test:
-	@echo "${YELLOW}Exécution des tests...${RESET}"
-	pytest $(TEST_PATH) -v
+test: test-unit test-integration
+
+## Exécute uniquement les tests unitaires
+test-unit:
+	@echo "Exécution des tests unitaires..."
+	python -m pytest $(TEST_PATH)/unit -v
+
+## Exécute uniquement les tests d'intégration
+test-integration:
+	@echo "Exécution des tests d'intégration..."
+	python -m pytest $(TEST_PATH)/integration -v
 
 ## Exécute les tests avec couverture de code
 test-cov:
-	@echo "${YELLOW}Exécution des tests avec couverture...${RESET}"
-	pytest --cov=src --cov-report=term-missing --cov-report=html $(TEST_PATH)
-	@echo "${GREEN}Rapport de couverture généré dans htmlcov/index.html${RESET}"
+	@echo "Exécution des tests avec couverture..."
+	python -m pytest --cov=src --cov-report=term-missing --cov-report=html $(TEST_PATH)
 
-## Vérifie la qualité du code avec flake8
+## Vérification de la qualité du code
 lint:
-	@echo "${YELLOW}Vérification de la qualité du code...${RESET}"
-	flake8 src/
+	@echo "Vérification de la qualité du code..."
+	python -m flake8 src tests
 
-## Formate le code avec black
+## Formatage du code
 format:
-	@echo "${YELLOW}Formatage du code...${RESET}"
-	black src/ tests/
+	@echo "Formatage du code..."
+	black src tests
+	isort src tests
 
-## Vérifie les types avec mypy
+## Vérification des types
 type-check:
-	@echo "${YELLOW}Vérification des types...${RESET}"
-	mypy src/
+	@echo "Vérification des types..."
+	mypy src
 
 ## Nettoie les fichiers temporaires
 clean:
-	@echo "${YELLOW}Nettoyage...${RESET}"
-	rm -rf .mypy_cache/
-	rm -rf .pytest_cache/
-	rm -rf htmlcov/
-	find . -type d -name "__pycache__" -exec rm -rf {} +
+	@echo "Nettoyage..."
+	if exist .pytest_cache rmdir /s /q .pytest_cache
+	if exist htmlcov rmdir /s /q htmlcov
+	if exist .mypy_cache rmdir /s /q .mypy_cache
+	if exist tasks_backup.json del tasks_backup.json
+	for /d /r . %%d in (__pycache__) do @if exist "%%d" rmdir /s /q "%%d"
+	for /d /r . %%d in (.ruff_cache) do @if exist "%%d" rmdir /s /q "%%d"
 
-## Installe les hooks git
-install-hooks:
-	@echo "${YELLOW}Installation des hooks git...${RESET}"
-	pre-commit install
-
-## Exécute toutes les vérifications (tests, lint, format, type-check)
-check-all: test lint format type-check
-
-## Démarre l'application
-run:
-	@echo "${YELLOW}Démarrage de l'application...${RESET}"
-	python -m src.task_manager.manager
+## Lance la démonstration
+demo:
+	@echo "Lancement de la démonstration..."
+	python -m demo
