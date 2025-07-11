@@ -1,0 +1,73 @@
+name: Tests et Qualité
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9, "3.10", "3.11"]
+        os: [ubuntu-latest]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    # Installation des dépendances
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install pytest pytest-cov black flake8 mypy
+
+    # Vérification du formatage avec Black
+    - name: Check code formatting with Black
+      run: |
+        black --check src/ tests/
+
+    # Vérification du style avec Flake8
+    - name: Lint with Flake8
+      run: |
+        flake8 src/ tests/ --count --select=E9,F63,F7,F82 --show-source --statistics
+        flake8 src/ tests/ --count --max-complexity=10 --max-line-length=88 --statistics
+
+    # Vérification des types avec mypy
+    - name: Type checking with mypy
+      run: |
+        mypy src/ --ignore-missing-imports
+
+    # Exécution des tests unitaires avec couverture
+    - name: Run unit tests with coverage
+      run: |
+        python -m pytest tests/unit/ -v --cov=src --cov-report=xml --cov-report=term-missing
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+
+    # Exécution des tests d'intégration
+    - name: Run integration tests
+      run: |
+        python -m pytest tests/integration/ -v
+      env:
+        PYTHONPATH: ${{ github.workspace }}
+
+    # Téléchargement du rapport de couverture
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella-${{ matrix.os }}-${{ matrix.python-version }}
+        fail_ci_if_error: false
+
+    # Vérification du seuil de couverture
+    - name: Check coverage threshold
+      run: |
+        python -m pytest --cov=src --cov-fail-under=80 tests/unit/
+      env:
+        PYTHONPATH: ${{ github.workspace }}

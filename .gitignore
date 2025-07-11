@@ -1,0 +1,83 @@
+# Environnements virtuels
+venv/
+env/
+.venv/
+ENV/
+
+# Fichiers Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Environnements et éditeurs
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Fichiers de couverture de test
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
+
+# Fichiers de configuration loc
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Fichiers de cache et logs
+*.log
+*.sqlite
+*.db
+
+# Fichiers de déploiement
+instance/
+.webassets-cache
+
+# Fichiers de documentation
+docs/_build/
+
+# Fichiers spécifiques à Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Fichiers de configuration Jupyter Notebook
+.ipynb_checkpoints
+
+# Fichiers de configuration Python
+.python-version
+
+# Fichiers de configuration mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
